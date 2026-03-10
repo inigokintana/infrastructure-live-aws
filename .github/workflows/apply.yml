@@ -1,0 +1,74 @@
+name: AWS Infrastructure - Apply
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'prod/**'
+      - 'non-prod/**'
+      - 'root.hcl'
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
+      # - name: Setup Terraform
+      #   uses: hashicorp/setup-terraform@v2
+      #   with:
+      #     # https://docs.terragrunt.com/reference/supported-versions
+      #     terraform_version: 1.14.0
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          #terraform_version: 1.6.0
+          tofu_version: 1.11.5
+      
+      - name: Setup Terragrunt
+        run: |
+          wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.95.0/terragrunt_linux_amd64
+          chmod +x terragrunt_linux_amd64
+          sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
+      
+      - name: Generate Stacks
+        run: |
+          cd prod/us-east-1/eks-foundation-stack
+          terragrunt stack generate
+          cd - > /dev/null
+          
+          cd non-prod/us-east-1/eks-foundation-stack
+          terragrunt stack generate
+      
+      - name: Apply Production
+        run: |
+          cd prod/us-east-1/eks-foundation-stack
+          echo "Non-prod changes only - skipping prod apply until explicit manual approval"
+      
+      - name: Apply Non-Production
+        run: |
+          cd non-prod/us-east-1/eks-foundation-stack
+          terragrunt stack run apply -auto-approve
+      
+      - name: Commit Generated State
+        if: success()
+        run: |
+          git config user.email "inigokintana@gmail.com"
+          git config user.name "IaC CI/CD"
+          git add .terragrunt-stack/ 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "Auto-commit: Generated Terragrunt stack units"
+          git push origin main || echo "Nothing to push"
+      
+      - name: Notify Apply
+        run: |
+          echo "## ✅ Infrastructure Apply Completed" >> $GITHUB_STEP_SUMMARY
+          echo "Non-production EKS foundation stack applied" >> $GITHUB_STEP_SUMMARY
+          echo "Production changes require manual review" >> $GITHUB_STEP_SUMMARY

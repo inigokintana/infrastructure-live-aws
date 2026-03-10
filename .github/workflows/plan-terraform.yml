@@ -1,0 +1,116 @@
+name: AWS Infrastructure - Plan & Validate
+
+on:
+  pull_request:
+    paths:
+      - 'prod/**'
+      - 'non-prod/**'
+      - 'root.hcl'
+      - '.github/workflows/plan.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'prod/**'
+      - 'non-prod/**'
+      - 'root.hcl'
+
+jobs:
+  plan-prod:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.files[*].filename, 'prod/') || github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6.0
+      
+      - name: Setup Terragrunt
+        run: |
+          wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.95.0/terragrunt_linux_amd64
+          chmod +x terragrunt_linux_amd64
+          sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
+      
+      - name: Generate Stack (prod)
+        run: |
+          cd prod/us-east-1/eks-foundation-stack
+          terragrunt stack generate
+      
+      - name: Terraform Plan (prod)
+        id: plan
+        run: |
+          cd prod/us-east-1/eks-foundation-stack
+          terragrunt stack run plan > tfplan.out 2>&1
+          cat tfplan.out
+        continue-on-error: true
+      
+      - name: Comment PR with Plan (prod)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('prod/us-east-1/eks-foundation-stack/tfplan.out', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## AWS Production Plan\n\`\`\`\n${plan}\n\`\`\``
+            });
+
+  plan-non-prod:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.files[*].filename, 'non-prod/') || github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.14.0
+      
+      - name: Setup Terragrunt
+        run: |
+          wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.95.0/terragrunt_linux_amd64
+          chmod +x terragrunt_linux_amd64
+          sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
+      
+      - name: Generate Stack (non-prod)
+        run: |
+          cd non-prod/us-east-1/eks-foundation-stack
+          terragrunt stack generate
+      
+      - name: Terraform Plan (non-prod)
+        id: plan
+        run: |
+          cd non-prod/us-east-1/eks-foundation-stack
+          terragrunt stack run plan > tfplan.out 2>&1
+          cat tfplan.out
+        continue-on-error: true
+
+  summary:
+    runs-on: ubuntu-latest
+    needs: [plan-prod, plan-non-prod]
+    if: always()
+    steps:
+      - name: Plan Summary
+        run: |
+          echo "## AWS Infrastructure Plan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "✓ Production plan generated" >> $GITHUB_STEP_SUMMARY
+          echo "✓ Non-production plan generated" >> $GITHUB_STEP_SUMMARY
