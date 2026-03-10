@@ -7,10 +7,10 @@ locals {
 }
 
 unit "vpc" {
-  # source = "git::https://github.com/inigokintana/terragrunt-infrastructure-catalog.git//units/aws-vpc?ref=${values.version}"
+  source = "git::https://github.com/inigokintana/terragrunt-infrastructure-catalog.git//units/aws-vpc?ref=${values.version}"
   # source = "${get_repo_root()}/terragrunt-infrastructure-catalog/units/aws-vpc"
   #source = "../../../../terragrunt-infrastructure-catalog/units/aws-vpc"
-  source = "/home/inigokintana/IaC-SovereignCloudAI/terragrunt-infrastructure-catalog/units/aws-vpc"
+  #source = "/home/inigokintana/IaC-SovereignCloudAI/terragrunt-infrastructure-catalog/units/aws-vpc"
   path   = "vpc"
 
   values = {
@@ -27,10 +27,10 @@ unit "vpc" {
 }
 
 unit "eks" {
-  # source = "git::https://github.com/inigokintana/terragrunt-infrastructure-catalog.git//units/aws-eks?ref=${values.version}"
+  source = "git::https://github.com/inigokintana/terragrunt-infrastructure-catalog.git//units/aws-eks?ref=${values.version}"
   # source = "${get_repo_root()}/terragrunt-infrastructure-catalog/units/aws-eks"
   #source = "../../../../terragrunt-infrastructure-catalog/units/aws-eks"
-  source = "/home/inigokintana/IaC-SovereignCloudAI/terragrunt-infrastructure-catalog/units/aws-eks"
+  #source = "/home/inigokintana/IaC-SovereignCloudAI/terragrunt-infrastructure-catalog/units/aws-eks"
   path   = "eks"
 
   values = {
