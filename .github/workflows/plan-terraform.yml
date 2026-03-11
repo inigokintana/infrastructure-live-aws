@@ -18,6 +18,7 @@ on:
 jobs:
   plan-prod:
     runs-on: ubuntu-latest
+    environment: prod
     if: contains(github.event.pull_request.files[*].filename, 'prod/') || github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
@@ -69,6 +70,7 @@ jobs:
 
   plan-non-prod:
     runs-on: ubuntu-latest
+    environment: non-prod
     if: contains(github.event.pull_request.files[*].filename, 'non-prod/') || github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
