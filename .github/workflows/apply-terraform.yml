@@ -8,6 +8,7 @@ on:
       - 'prod/**'
       - 'non-prod/**'
       - 'root.hcl'
+      - '.github/workflows/apply-terraform.yml'
 
 jobs:
   apply:
