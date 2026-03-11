@@ -30,7 +30,7 @@ jobs:
           else
             echo "ACCESS KEY exists"
           fi
-          
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -40,6 +40,7 @@ jobs:
       
       #- name: Setup Terraform
       #  uses: hashicorp/setup-terraform@v2
+      #######################################
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v1
         with:
@@ -93,6 +94,7 @@ jobs:
           else
             echo "ACCESS KEY exists"
           fi
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
