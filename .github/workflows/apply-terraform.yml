@@ -61,7 +61,8 @@ jobs:
       - name: Apply Non-Production
         run: |
           cd non-prod/us-east-1/eks-foundation-stack
-          terragrunt stack run apply -auto-approve
+          # terragrunt stack run apply -- -auto-approve
+          echo "Running from terraform side: terragrunt stack run apply -- -auto-approve"
       
       - name: Commit Generated State
         if: success()
