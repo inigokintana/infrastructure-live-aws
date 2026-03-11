@@ -15,7 +15,8 @@ unit "vpc" {
   path   = "vpc"
 
   values = {
-    #version              = values.version
+    #version              = values.version # commented for source local test
+    version              = "v.0.0.1" # uncommented for source NON local test
     vpc_cidr             = "10.100.0.0/16"
     availability_zones   = try(values.availability_zones, ["us-east-1a", "us-east-1b"])
     enable_nat           = try(values.enable_nat, true)
@@ -35,7 +36,8 @@ unit "eks" {
   path   = "eks"
 
   values = {
-    # version                  = values.version
+    #version              = values.version # commented for source local test
+    version              = "v.0.0.1" # uncommented for source NON local test
     cluster_name             = "non-prod-eks-primary"
     kubernetes_version       = try(values.kubernetes_version, "1.32")
     # vpc_path                 = unit.vpc.path
