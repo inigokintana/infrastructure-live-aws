@@ -59,15 +59,18 @@ jobs:
           echo "Non-prod changes only - skipping prod apply until explicit manual approval"
       
       - name: Apply Non-Production
+        env:
+          TERRAGRUNT_NON_INTERACTIVE: "true"
         run: |
           cd non-prod/us-east-1/eks-foundation-stack
           # terragrunt stack run apply --terragrunt-non-interactive -- -auto-approve
-          echo "Running from terraform side: terragrunt stack run apply --terragrunt-non-interactive -- -auto-approve"
+          # terragrunt stack run apply -- -auto-approve
+          echo "skipping with terraform -opentofu is prioriatized"
       
       - name: Commit Generated State
         if: success()
         run: |
-          git config user.email "iac@sovereigncloud.ai"
+          git config user.email "inigokintana@gmail.com"
           git config user.name "IaC CI/CD"
           git add .terragrunt-stack/ 2>/dev/null || true
           git diff --cached --quiet || git commit -m "Auto-commit: Generated Terragrunt stack units"

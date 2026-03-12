@@ -64,9 +64,12 @@ jobs:
           echo "Non-prod changes only - skipping prod apply until explicit manual approval"
       
       - name: Apply Non-Production
+        env:
+          TERRAGRUNT_NON_INTERACTIVE: "true"
         run: |
           cd non-prod/us-east-1/eks-foundation-stack
-          terragrunt stack run apply --terragrunt-non-interactive -- -auto-approve
+          # terragrunt stack run apply --terragrunt-non-interactive -- -auto-approve
+          terragrunt stack run apply -- -auto-approve
       
       - name: Commit Generated State
         if: success()
