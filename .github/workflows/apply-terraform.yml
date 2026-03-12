@@ -61,12 +61,18 @@ jobs:
       - name: Apply Non-Production
         env:
           TG_NON_INTERACTIVE: "true"
-          TERRAGRUNT_LOG_LEVEL: "debug"
+          TG_LOG_LEVEL: "debug"
         run: |
           cd non-prod/us-east-1/eks-foundation-stack
+          echo "Check git tags"
+          git ls-remote --tags https://github.com/inigokintana/terragrunt-infrastructure-catalog.git
+          # Check if the generated HCL actually has a source defined
+          ls -R .terragrunt-stack
+          echo "--- GENERATED VPC HCL ---"
+          cat .terragrunt-stack/vpc/terragrunt.hcl
+          cat .terragrunt-stack/eks/terragrunt.hcl
           # terragrunt stack run apply --terragrunt-non-interactive -- -auto-approve
           # terragrunt stack run apply -- -auto-approve
-          ls -R .terragrunt-stack
           echo "skipping with terraform -opentofu is prioriatized"
       
       - name: Commit Generated State
