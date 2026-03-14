@@ -45,6 +45,7 @@ jobs:
         run: |
           cd prod/us-east-1/eks-foundation-stack
           terragrunt stack generate
+          terragrunt stack run init
       
       - name: Terraform Plan (prod)
         id: plan
@@ -97,6 +98,7 @@ jobs:
         run: |
           cd non-prod/us-east-1/eks-foundation-stack
           terragrunt stack generate
+          terragrunt stack run init
       
       - name: Terraform Plan (non-prod)
         id: plan

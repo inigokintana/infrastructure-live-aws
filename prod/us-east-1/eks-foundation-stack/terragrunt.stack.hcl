@@ -1,22 +1,20 @@
-
 # Stack configuration for AWS EKS Foundation in production
 
 locals {
   stack_name = "eks-foundation"
   environment = "prod"
   region      = "us-east-1"
-  vpc_version = "v.0.0.1"
-  eks_version = "v.0.0.1"
 }
 
 unit "vpc" {
-  source = "git::https://github.com/inigokintana/terragrunt-infrastructure-catalog.git//units/aws-vpc?ref=${local.vpc_version}"
+  source = "git::https://github.com/inigokintana/terragrunt-infrastructure-catalog.git//units/aws-vpc?ref=v0.0.1"
   # source = "${get_repo_root()}/terragrunt-infrastructure-catalog/units/aws-vpc"
   # source = "../../../../terragrunt-infrastructure-catalog/units/aws-vpc"
   # source = "/home/inigokintana/IaC-SovereignCloudAI/terragrunt-infrastructure-catalog/units/aws-vpc"
   path   = "vpc"
 
   values = {
+    version          =  try(values.version, "v0.0.1")
     vpc_cidr             = "10.100.0.0/16"
     availability_zones   = try(values.availability_zones, ["us-east-1a", "us-east-1b"])
     enable_nat           = try(values.enable_nat, true)
@@ -29,14 +27,15 @@ unit "vpc" {
 }
 
 unit "eks" {
-  source = "git::https://github.com/inigokintana/terragrunt-infrastructure-catalog.git//units/aws-eks?ref=${local.eks_version}"
+  source = "git::https://github.com/inigokintana/terragrunt-infrastructure-catalog.git//units/aws-eks?ref=v0.0.1"
   # source = "${get_repo_root()}/terragrunt-infrastructure-catalog/units/aws-eks"
   # source = "../../../../terragrunt-infrastructure-catalog/units/aws-eks"
   # source = "/home/inigokintana/IaC-SovereignCloudAI/terragrunt-infrastructure-catalog/units/aws-eks"
   path   = "eks"
 
   values = {
-    cluster_name             = "non-prod-eks-primary"
+    version          =  try(values.version, "v0.0.1")
+    cluster_name             = "prod-eks-primary"
     kubernetes_version       = try(values.kubernetes_version, "1.32")
     # vpc_path                 = unit.vpc.path
     node_group_desired_size  = try(values.node_group_desired_size, 2)
