@@ -15,7 +15,7 @@ unit "vpc" {
 
   values = {
     version          =  try(values.version, "v0.0.1")
-    vpc_cidr             = "10.100.0.0/16"
+    vpc_cidr             = "10.200.0.0/16"
     availability_zones   = try(values.availability_zones, ["us-east-1a", "us-east-1b"])
     enable_nat           = try(values.enable_nat, true)
     tags = {
